@@ -1,0 +1,2 @@
+pip install wikipedia google_images_download gtts request mutagen shutil requests_html pixabay requests_html inscriptis python-pixabay
+pip install --upgrade google-api-python-client oauth2client progressbar2 Pillow==4.0.0 mutagen
