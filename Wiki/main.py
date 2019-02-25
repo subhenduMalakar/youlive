@@ -34,10 +34,10 @@ def count(list):
 
 for yi1 in range(97,123):
     ya1=chr(yi1)
-    for yj1 in range(98,123):
+    for yj1 in range(100,123):
         yb1=chr(yj1)
-        if(yi1==97 and yj1==98):
-            kk1=104
+        if(yi1==97 and yj1==100):
+            kk1=101
         else:
             kk1=97
         
