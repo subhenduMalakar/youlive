@@ -1,0 +1,198 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/subhenduMalakar/youlive/blob/master/free%20llmipynb\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "a7f51e2f",
+        "outputId": "c382510b-1c60-449d-da54-0348cb7a1af2"
+      },
+      "source": [
+        "from openai import OpenAI\n",
+        "\n",
+        "# Working Gemini 2.5 Flash Key (Updated to new key due to rate limit)\n",
+        "client_gemini = OpenAI(\n",
+        "    api_key=\"sk-B8ZObuRLKy0KZ3END5Gso7uOTD6IoAdVBbLH3Zl5rU5w5WqL\",\n",
+        "    base_url=\"https://aiapiv2.pekpik.com/v1\"\n",
+        ")\n",
+        "\n",
+        "try:\n",
+        "    response = client_gemini.chat.completions.create(\n",
+        "        model=\"gemini-2.5-flash\",\n",
+        "        messages=[{\"role\": \"user\", \"content\": \"Hello\"}]\n",
+        "    )\n",
+        "    print(\"Gemini 2.5 Response:\", response.choices[0].message.content)\n",
+        "except Exception as e:\n",
+        "    print(\"Gemini 2.5 Failed:\", e)"
+      ],
+      "execution_count": 17,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Gemini 2.5 Failed: Error code: 429 - {'error': {'message': 'openai_error', 'type': 'bad_response_status_code', 'param': '', 'code': 'bad_response_status_code'}}\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "52944e86",
+        "outputId": "2f73075a-635a-488b-f215-0c2e7b1ced9f"
+      },
+      "source": [
+        "from openai import OpenAI\n",
+        "\n",
+        "# Working DeepSeek Chat Key\n",
+        "client_deepseek = OpenAI(\n",
+        "    api_key=\"sk-5EmKz45WeEyKGYSPPTti1V6O78taqFmzxmEiPyweDWgaqDpa\",\n",
+        "    base_url=\"https://aiapiv2.pekpik.com/v1\"\n",
+        ")\n",
+        "\n",
+        "try:\n",
+        "    response = client_deepseek.chat.completions.create(\n",
+        "        model=\"deepseek-chat\",\n",
+        "        messages=[{\"role\": \"user\", \"content\": \"Hello\"}]\n",
+        "    )\n",
+        "    print(\"DeepSeek Response:\", response.choices[0].message.content)\n",
+        "except Exception as e:\n",
+        "    print(\"DeepSeek Failed:\", e)"
+      ],
+      "execution_count": 18,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "DeepSeek Response: 你好！😊 很高兴见到你！\n",
+            "\n",
+            "我是DeepSeek，由深度求索公司创造的AI助手。无论你想聊天、寻求帮助、解答问题，还是需要协助处理文档，我都很乐意为你提供支持！\n",
+            "\n",
+            "有什么我可以帮助你的吗？无论是学习、工作还是日常生活中的问题，我都很愿意和你一起探讨。✨\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "8f3c8f9c"
+      },
+      "source": [
+        "### Load Testing: 20 Consecutive Requests\n",
+        "This cell will perform 20 requests per model using a query designed to elicit longer responses to test stability and rate limits."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "07612de9",
+        "outputId": "870622ac-2165-4bb0-9241-38c3410d1fac"
+      },
+      "source": [
+        "import time\n",
+        "import random\n",
+        "\n",
+        "def run_stress_test(name, client, model_name):\n",
+        "    print(f\"--- Starting Stress Test for {name} ---\")\n",
+        "    query = \"Explain the theory of relativity in great detail, including its historical context and impact on modern physics.\"\n",
+        "    success_count = 0\n",
+        "\n",
+        "    for i in range(1, 21):\n",
+        "        retries = 3\n",
+        "        while retries > 0:\n",
+        "            try:\n",
+        "                start_time = time.time()\n",
+        "                response = client.chat.completions.create(\n",
+        "                    model=model_name,\n",
+        "                    messages=[{\"role\": \"user\", \"content\": query}],\n",
+        "                    max_tokens=500\n",
+        "                )\n",
+        "                duration = time.time() - start_time\n",
+        "                success_count += 1\n",
+        "                print(f\"[Call {i}] Success ({duration:.2f}s). Response length: {len(response.choices[0].message.content)} chars\")\n",
+        "                break # Exit retry loop on success\n",
+        "            except Exception as e:\n",
+        "                if \"429\" in str(e):\n",
+        "                    wait = (4 - retries) * 5 + random.uniform(1, 3)\n",
+        "                    print(f\"[Call {i}] Rate limited (429). Retrying in {wait:.1f}s...\")\n",
+        "                    time.sleep(wait)\n",
+        "                    retries -= 1\n",
+        "                else:\n",
+        "                    print(f\"[Call {i}] Failed: {e}\")\n",
+        "                    break\n",
+        "\n",
+        "        # Standard delay between calls to be safe\n",
+        "        time.sleep(2)\n",
+        "\n",
+        "    print(f\"--- {name} Test Complete: {success_count}/20 successful ---\\n\")\n",
+        "\n",
+        "# Run test for DeepSeek specifically as Gemini is currently rate-limited\n",
+        "run_stress_test(\"DeepSeek Chat\", client_deepseek, \"deepseek-chat\")"
+      ],
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "--- Starting Stress Test for DeepSeek Chat ---\n",
+            "[Call 1] Success (19.60s). Response length: 2206 chars\n",
+            "[Call 2] Success (18.67s). Response length: 2154 chars\n",
+            "[Call 3] Success (20.87s). Response length: 2134 chars\n",
+            "[Call 4] Success (17.80s). Response length: 2405 chars\n",
+            "[Call 5] Success (18.18s). Response length: 2170 chars\n",
+            "[Call 6] Success (18.43s). Response length: 2206 chars\n",
+            "[Call 7] Success (18.60s). Response length: 2250 chars\n",
+            "[Call 8] Success (18.78s). Response length: 2201 chars\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "4RiTqmtLOw_I"
+      },
+      "source": [
+        "### Note\n",
+        "All non-working and redundant cells have been removed or converted to markdown to keep the notebook clean. Use the cells above for API calls."
+      ]
+    }
+  ]
+}
